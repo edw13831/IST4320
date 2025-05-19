@@ -1,0 +1,61 @@
+def determine_federal_tax(income):
+    """
+    Determine federal tax based on 2024 single-filing brackets.
+    :param income: taxable income in USD
+    :return: federal tax owed in USD
+    """
+    brackets = [
+        (0,      11000, 0.10),
+        (11000,  44725, 0.12),
+        (44725,  95375, 0.22),
+        (95375, 182100, 0.24),
+        (182100,231250, 0.32),
+        (231250,578125, 0.35),
+        (578125,float("inf"), 0.37),
+    ]
+    tax = 0.0
+    for lower, upper, rate in brackets:
+        if income > lower:
+            taxed_amount = min(income, upper) - lower
+            tax += taxed_amount * rate
+        else:
+            break
+    return tax
+
+def determine_state_tax(income, state):
+    """
+    Determine state tax using a flat-rate lookup.
+    :param income: taxable income in USD
+    :param state: two-letter state abbreviation
+    :return: state tax owed in USD
+    """
+    # Example flat rates; expand or replace with detailed brackets as desired
+    state_rates = {
+        'CA': 0.133,  # California top marginal ~13.3%
+        'NY': 0.0882, # New York top marginal ~8.82%
+        'TX': 0.00,   # No state income tax
+        'FL': 0.00,   # No state income tax
+        'WA': 0.00,   # No state income tax
+        'IL': 0.0495, # Illinois flat 4.95%
+        'NJ': 0.1075, # New Jersey top marginal ~10.75%
+        # …add more states as needed…
+    }
+    rate = state_rates.get(state.upper(), None)
+    if rate is None:
+        raise ValueError(f"State '{state}' not recognized. Use a two-letter code.")
+    return income * rate
+
+if __name__ == "__main__":
+    try:
+        income = float(input("Enter your taxable income (USD): "))
+        state = input("Enter your state (e.g. CA, NY, TX): ").strip().upper()
+
+        fed_tax = determine_federal_tax(income)
+        st_tax  = determine_state_tax(income, state)
+        total   = fed_tax + st_tax
+
+        print(f"\nFederal tax owed: ${fed_tax:,.2f}")
+        print(f"{state} state tax owed: ${st_tax:,.2f}")
+        print(f"Combined tax:      ${total:,.2f}")
+    except ValueError as e:
+        print(f"Error: {e}")
